@@ -7,7 +7,7 @@ module.exports = function(db) {
             // var timestamp = new Date();
             db.put(point.timestamp, point.value, function(err) {
                    if (err)  return cb(err);
-                   cb();
+                   cb(true);
                    
             });
         },
@@ -25,7 +25,7 @@ module.exports = function(db) {
                 cb(err);
             })
             .on('end', function(){
-                cb(null,ret);
+                cb(null,ret)
             })
         
         }
