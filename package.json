@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/antodip/timeseries/issues"
   },
-  "homepage": "https://github.com/antodip/timeseries#readme"
+  "homepage": "https://github.com/antodip/timeseries#readme",
+  "dependencies": {
+    "levelup": "^1.3.2"
+  }
 }
