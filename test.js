@@ -2,7 +2,7 @@ const test = require('tape');
 var pq = require('proxyquire')
 const mymodule = require('./time_series_service.js');
 const memdb = require('memdb');
-
+const ndjson = require('ndjson') 
 
 
 test('should add point', function (t) {
@@ -28,7 +28,7 @@ test('should add point', function (t) {
 });
 
 
-test.only('get points', function (t) {
+test('get points', function (t) {
     var start = new Date();
     var end = new Date();
     end.setSeconds(end.getSeconds() + 1)
@@ -52,6 +52,41 @@ test.only('get points', function (t) {
             t.deepEqual(res, exp)
             t.end()
         })
+    });
+
+
+})
+
+
+test('get stream points', function (t) {
+    var start = new Date();
+    var end = new Date();
+    end.setSeconds(end.getSeconds() + 1)
+    var exp = [{ timestamp: start, value: 1.0 },
+        { timestamp: end, value: 2.0 }]
+
+    var db = memdb();
+    var service = mymodule(db);
+
+    db.batch()
+    .put(exp[0].timestamp.toISOString(), exp[0].value)
+    .put(exp[1].timestamp.toISOString(), exp[1].value)
+    .write(function (err) {
+       t.error(err)
+
+       var ret = [];
+        var stream = service.pointsStream(start, end)
+        stream.on('data', function (data) {
+                ret.push(data);
+        })
+        .on('err', function (err) {
+            t.error(err);
+        })
+        .on('end', function () {
+            t.deepEqual(ret, exp)
+            t.end()
+        })
+        
     });
 
 

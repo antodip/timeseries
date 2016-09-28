@@ -1,37 +1,62 @@
-const db = require('levelup');
+'use strict'
+const db = require('levelup')
+const stream = require('stream')
+const pump = require('pump')
 
-module.exports = function(db) {
+class ToPoints extends stream.Transform {
+
+    constructor() {
+        super({
+            objectMode: true
+        })
+    }
+
+    _transform(chunk, enc, cb) {
+        this.push({ timestamp: new Date(chunk.key), value: Number(chunk.value) });
+        cb();
+    }
+}
+
+module.exports = function (db) {
 
     return {
-        add: function(point, cb) {
+        add: function (point, cb) {
             // var timestamp = new Date();
-            db.put(point.timestamp.toISOString(), point.value, function(err) {
-                   if (err)  return cb(err);
-                   cb();
-                   
+            db.put(point.timestamp.toISOString(), point.value, function (err) {
+                if (err) return cb(err);
+                cb();
+
             });
         },
 
-        points: function(start, end, cb) {
-            try{
-                var ret = [];
-                db.createReadStream({
-                    'gte': start.toISOString(),
-                    'lte': end.toISOString()
-                }) 
-                .on('data' , function(data){
-                    ret.push({ timestamp: new Date(data.key), value: Number(data.value)});
-                })
-                .on('err',function(err) {
-                    cb(err);
-                })
-                .on('end', function(){
-                    cb(null,ret)
-                })
-        }
-        catch(ex){
-             cb(ex);
-        }
+        pointsStream: function (start, end) {
+             var input = db.createReadStream({
+                'gte': start.toISOString(),
+                'lte': end.toISOString()
+            });
+
+
+            //return input.pipe(new ToPoints());
+
+            return pump(input,new ToPoints())
+        },
+
+        points: function (start, end, cb) {
+
+            var ret = [];
+            this.pointsStream(start,end)
+           
+            .on('data', function (data) {
+                ret.push(data);
+            })
+            .on('err', function (err) {
+                cb(err);
+            })
+            .on('end', function () {
+                cb(null, ret)
+            })
+            
+
         }
 
     }
