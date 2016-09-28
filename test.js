@@ -7,8 +7,6 @@ const memdb = require('memdb');
 
 test('should add point', function (t) {
 
-
-
     var expected = {
         timestamp: new Date(),
         value: 1.0

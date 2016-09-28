@@ -2,7 +2,7 @@
   "name": "@antodip/timeseries",
   "version": "0.0.2",
   "description": "",
-  "main": "index.js",
+  "main": "time_series_service.js",
   "scripts": {
     "test": "tape test.js | tap-spec"
   },
