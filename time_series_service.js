@@ -5,9 +5,9 @@ module.exports = function(db) {
     return {
         add: function(point, cb) {
             // var timestamp = new Date();
-            db.put(point.timestamp, point.value, function(err) {
+            db.put(point.timestamp.toISOString(), point.value, function(err) {
                    if (err)  return cb(err);
-                   cb(true);
+                   cb();
                    
             });
         },
@@ -16,11 +16,11 @@ module.exports = function(db) {
             try{
                 var ret = [];
                 db.createReadStream({
-                    'gte': start,
-                    'lte': end
+                    'gte': start.toISOString(),
+                    'lte': end.toISOString()
                 }) 
                 .on('data' , function(data){
-                    ret.push(data);
+                    ret.push({ timestamp: new Date(data.key), value: Number(data.value)});
                 })
                 .on('err',function(err) {
                     cb(err);
